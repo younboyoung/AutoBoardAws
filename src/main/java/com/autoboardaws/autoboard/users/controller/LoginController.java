@@ -1,4 +1,4 @@
-package com.autoboardaws.autoboard.controller;
+package com.autoboardaws.autoboard.users.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,5 +33,4 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed");
         }
     }
-
 }
