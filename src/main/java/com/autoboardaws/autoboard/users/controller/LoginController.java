@@ -21,7 +21,7 @@ public class LoginController {
     @PostMapping(value = "/api/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<?> login(@RequestParam Map<String, String> loginData) {
         try {
-            String username = loginData.get("username");
+            String username = loginData.get("email");
             String password = loginData.get("password");
 
             Authentication authentication = authenticationManager.authenticate(
