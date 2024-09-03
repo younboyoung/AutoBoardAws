@@ -13,7 +13,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public void createUser(Account account) {
-        userRepository.save(account);
+    public Account createUser(Account account) {
+        return userRepository.save(account);
     }
 }

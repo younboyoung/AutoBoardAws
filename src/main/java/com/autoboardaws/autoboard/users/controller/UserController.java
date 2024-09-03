@@ -6,6 +6,7 @@ import com.autoboardaws.autoboard.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,12 +21,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping(value = "/api/signup", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String signup(@RequestBody AccountDto accountDto) {
+    public ResponseEntity<?> signup(@RequestBody AccountDto accountDto) {
         ModelMapper mapper = new ModelMapper();
         Account account = mapper.map(accountDto, Account.class);
         account.setPassword(passwordEncoder.encode(accountDto.getPassword()));
-        userService.createUser(account);
+        Account user = userService.createUser(account);
 
-        return "redirect:/";
+        return ResponseEntity.ok("signup successful");
     }
 }

@@ -9,6 +9,6 @@ public class AccountDto {
     private String id;
     private String username;
     private String password;
-    private String email;
+    private String emailAddress;
     private String roles;
 }
