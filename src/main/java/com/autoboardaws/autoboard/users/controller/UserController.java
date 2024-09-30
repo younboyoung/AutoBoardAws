@@ -24,6 +24,7 @@ public class UserController {
     public ResponseEntity<?> signup(@RequestBody AccountDto accountDto) {
         ModelMapper mapper = new ModelMapper();
         Account account = mapper.map(accountDto, Account.class);
+        account.setRoles("ROLE_USER"); // 기본 권한을 사용자로 설정
         account.setPassword(passwordEncoder.encode(accountDto.getPassword()));
         Account user = userService.createUser(account);
 
