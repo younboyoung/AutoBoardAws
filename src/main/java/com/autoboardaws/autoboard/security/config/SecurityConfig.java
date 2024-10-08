@@ -2,7 +2,6 @@ package com.autoboardaws.autoboard.security.config;
 
 import com.autoboardaws.autoboard.security.entrypoint.RestAuthenticationEntryPoint;
 import com.autoboardaws.autoboard.security.filters.RestAuthenticationFilter;
-import com.autoboardaws.autoboard.security.handler.FormAccessDeniedHandler;
 import com.autoboardaws.autoboard.security.handler.RestAccessDeniedHandler;
 import com.autoboardaws.autoboard.security.handler.RestAuthenticationFailureHandler;
 import com.autoboardaws.autoboard.security.handler.RestAuthenticationSuccessHandler;

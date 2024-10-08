@@ -1,48 +1,27 @@
 package com.autoboardaws.autoboard.users.controller;
 
 import com.autoboardaws.autoboard.domain.dto.AccountDto;
+import com.autoboardaws.autoboard.security.service.JWTService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-@Controller
+@RestController
+@RequestMapping("/api/auth")
 public class LoginController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-//    @PostMapping(value = "/api/login", consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<?> login(@RequestParam Map<String, String> request) {
-//        try {
-//            String username = request.get("emailAddress");
-//            String password = request.get("password");
-//
-//            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(username, password);
-//            Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-//
-//            return ResponseEntity.ok("Login successful");
-//
-//        } catch (AuthenticationException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login failed");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Login failed");
-//        }
-//    }
+    private JWTService jwtService;
 
     @GetMapping("/denied")
     public String accessDenied(@RequestParam(value="exception", required=false) String exception,
@@ -61,5 +40,16 @@ public class LoginController {
         }
 
         return "logout";
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<?> checkAuthentication(HttpSession session) {
+        String jwt = (String) session.getAttribute("jwt");
+        if (jwt != null && jwtService.validateToken(jwt)) {
+            AccountDto user = jwtService.getUserFromToken(jwt);
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 }
