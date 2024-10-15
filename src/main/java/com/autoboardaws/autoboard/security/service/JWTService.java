@@ -1,38 +1,52 @@
 package com.autoboardaws.autoboard.security.service;
 
 import com.autoboardaws.autoboard.domain.dto.AccountDto;
+import com.autoboardaws.autoboard.domain.entity.Account;
+import com.autoboardaws.autoboard.security.util.JwtUtil;
+import com.autoboardaws.autoboard.users.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 @Service
+
 @Slf4j
 public class JWTService {
-    // 비밀 키 설정 (64 바이트 이상의 강력한 키 사용)
-    private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     // JWT 만료 시간 설정 (예: 1시간)
     private final long jwtExpirationMs = 3600000;
 
+    public JWTService(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
+
     // JWT 생성 메서드
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+        AccountDto accountDto = (AccountDto) authentication.getPrincipal();
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims, accountDto.getEmailAddress());
     }
 
     // JWT 토큰 생성
     private String createToken(Map<String, Object> claims, String subject) {
+        String secretKey = jwtUtil.getJwtSecret();
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
@@ -43,7 +57,7 @@ public class JWTService {
     }
 
     // JWT에서 사용자 이름 추출
-    public String extractUsername(String token) {
+    public String extractUserInfo(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -59,12 +73,15 @@ public class JWTService {
             extractAllClaims(token); // 토큰 파싱을 통해 유효성 검사
             return true;
         } catch (Exception e) {
+            log.error("JWT validation error: {}", e.getMessage());
             return false; // 토큰이 유효하지 않으면 false 반환
         }
     }
 
-    // JWT에서 모든 클레임 추출
+
     private Claims extractAllClaims(String token) {
+        String secretKey = jwtUtil.getJwtSecret();
+
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
@@ -72,14 +89,11 @@ public class JWTService {
                 .getBody();
     }
 
-    // JWT에서 사용자 정보를 추출하는 메서드 (예: AccountDto)
     public AccountDto getUserFromToken(String token) {
-        String username = extractUsername(token);
-        // username을 통해 사용자 정보 조회 (DB나 서비스 호출)
-        // 이 예시에서는 간단히 AccountDto 객체를 생성합니다.
-        AccountDto user = new AccountDto();
-        user.setEmailAddress(username);
-        // 필요 시 추가 정보 설정
-        return user;
+        String userEmailAddress = extractUserInfo(token);
+
+        Account account = userService.getUserByEmail(userEmailAddress);
+        AccountDto accountDto = new AccountDto(account);
+        return accountDto;
     }
 }

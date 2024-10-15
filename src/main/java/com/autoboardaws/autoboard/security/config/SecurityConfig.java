@@ -6,6 +6,7 @@ import com.autoboardaws.autoboard.security.handler.RestAccessDeniedHandler;
 import com.autoboardaws.autoboard.security.handler.RestAuthenticationFailureHandler;
 import com.autoboardaws.autoboard.security.handler.RestAuthenticationSuccessHandler;
 import com.autoboardaws.autoboard.security.provider.RestAuthenticationProvider;
+import com.autoboardaws.autoboard.security.service.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final RestAuthenticationProvider restAuthenticationProvider;
     private final RestAuthenticationSuccessHandler restSuccessHandler;
     private final RestAuthenticationFailureHandler restFailureHandler;
+    private final JWTService jwtService;
 
     @Bean
     public SecurityFilterChain restSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -43,7 +45,7 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/api","/api/login", "/api/signup").permitAll()
+                        .requestMatchers("/api", "/api/auth/check","/api/login", "/api/signup").permitAll()
                         .anyRequest().authenticated()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -80,7 +82,7 @@ public class SecurityConfig {
     }
 
     private RestAuthenticationFilter restAuthenticationFilter(HttpSecurity http, AuthenticationManager authenticationManager) {
-        RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(http);
+        RestAuthenticationFilter restAuthenticationFilter = new RestAuthenticationFilter(http, jwtService);
         restAuthenticationFilter.setAuthenticationManager(authenticationManager);
         restAuthenticationFilter.setAuthenticationSuccessHandler(restSuccessHandler);
         restAuthenticationFilter.setAuthenticationFailureHandler(restFailureHandler);

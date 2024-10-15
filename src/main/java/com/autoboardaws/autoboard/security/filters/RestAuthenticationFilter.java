@@ -29,10 +29,11 @@ import java.util.Map;
 public class RestAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final JWTService jwtService = new JWTService();
+    private final JWTService jwtService;
 
-    public RestAuthenticationFilter(HttpSecurity http) {
+    public RestAuthenticationFilter(HttpSecurity http, JWTService jwtService) {
         super(new AntPathRequestMatcher("/api/login", "POST"));
+        this.jwtService = jwtService;
         setSecurityContextRepository(getSecurityContextRepository(http));
     }
 

@@ -16,3 +16,6 @@ spring:
             non_contextual_creation: true
   thymeleaf:
     cache: true
+
+jwt:
+  secret: b1836507e0ad880977d9ba9c447d258f9b209196c7e8c9f4c41b0f2f4c938953
